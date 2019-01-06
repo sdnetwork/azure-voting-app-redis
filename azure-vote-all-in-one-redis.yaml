@@ -15,6 +15,8 @@ spec:
         ports:
         - containerPort: 6379
           name: redis
+      imagePullSecrets:
+       - name: registry-credentials 
 ---
 apiVersion: v1
 kind: Service
@@ -55,14 +57,28 @@ spec:
         env:
         - name: REDIS
           value: "azure-vote-back"
+      imagePullSecrets:
+       - name: registry-credentials 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: azure-vote-front
 spec:
-  type: LoadBalancer
   ports:
-  - port: 80
+  - port: 8080
   selector:
     app: azure-vote-front
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: azure-vote-back-ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /azure-vote-front
+        backend:
+          serviceName: azure-vote-front
+          servicePort: 8080
